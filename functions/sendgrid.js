@@ -21,8 +21,10 @@ exports.handler = async (event, context) => {
     const params = querystring.parse(event.body);
 
     console.log(ipn)
+    console.log(params)
   
     ipn.verify(params, {'allow_sandbox': true}, function callback(err, msg) {
+
         if (err) {
           console.error(err);
         } else {
