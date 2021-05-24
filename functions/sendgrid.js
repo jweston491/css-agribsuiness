@@ -39,15 +39,6 @@ exports.handler = async (event, context) => {
             .send(msg)
             .then(() => {
                 console.log('Email sent')
-                const redirectUrl = 'https://example.com'
-                return {
-                statusCode: 302,
-                headers: {
-                    Location: redirectUrl,
-                    'Cache-Control': 'no-cache',
-                },
-                body: JSON.stringify({})
-                }
             })
             .catch((error) => {
                 console.error(error)
