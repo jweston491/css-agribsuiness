@@ -46,18 +46,19 @@ exports.handler = async ( event, context ) => {
                 text: params.first_name + ' ' + params.last_name + ' registered for ' + params.item_name + '.',
                 html: '<p>Contact Info:<br/>Name: ' + params.first_name + ' ' + params.last_name + '<br/>Email: ' + params.payer_email + '<br/>Phone: ' + params.contact_phone + '</p><p>Address:<br/>' + params.address_street + '<br/>' + params.address_city + '<br/>' + params.address_state + ' ' + params.address_zip + ', ' + params.address_country + '</p>',
             }
-            sgMail
-            .send(msg)
-            .then(() => {
-                console.log('Email sent')
+            try {
+                await sgMail.send(msg);
+                console.log("Mail sent")
                 return {
-                    statusCode: 200,
-                    body: JSON.stringify({message: "Hello World"})
+                  statusCode: 200,
+                  body: 'Message sent',
                 };
-            })
-            .catch((error) => {
-                console.error(error)
-            })
+            } catch (err) {
+                return {
+                    statusCode: err.code,
+                    body: JSON.stringify({ msg: err.message }),
+                };
+            }
         }
     }
     catch (e) {
