@@ -10,32 +10,35 @@ const {
     SENDGRID_FROM_EMAIL,
   } = process.env;
 
-exports.handler = async (event, context) => {
-    // Only allow POST
-    if (event.httpMethod !== "POST") {
-      return { statusCode: 405, body: "Method Not Allowed" };
-    }
-  
-    // When the method is POST, the name will no longer be in the event’s
-    // queryStringParameters – it’ll be in the event body encoded as a query string
-    const params = querystring.parse(event.body);
+const ipnVerify = async ( params ) => {
+    console.log("Verifying...")
+    return new Promise((resolve, reject) => {
+        ipn.verify(params, {'allow_sandbox': true}, function callback(err, msg) {
+            if (err) return reject(err);
+            resolve();
+        })
+    })
+}
 
-    console.log(ipn)
-    console.log(params)
-  
-    ipn.verify(params, {'allow_sandbox': true}, function callback(err, msg) {
+exports.handler = async ( event, context ) => {
 
-        console.log("Function being called")
+    try {
+        console.log("Trying")
+        // Only allow POST
+        if (event.httpMethod !== "POST") {
+            return { statusCode: 405, body: "Method Not Allowed" };
+        }
+        // When the method is POST, the name will no longer be in the event’s
+        // queryStringParameters – it’ll be in the event body encoded as a query string
+        const params = querystring.parse(event.body);
 
-        if (err) {
-          console.error(err);
-        } else {
-       
-          if (params.payment_status == 'Completed') {
+        await ipnVerify( params )
+
+        if (params.payment_status == 'Completed') {
             // Payment has been confirmed as completed
-            console.log(SENDGRID_API_KEY)
+            console.log("Payment complete")
             sgMail.setApiKey(SENDGRID_API_KEY)
-            console.log(sgMail)
+            console.log("Set API Key")
             const msg = {
                 to: 'jweston491@gmail.com', // Change to your recipient
                 from: 'jacob.weston@wsu.edu', // Change to your verified sender
@@ -47,11 +50,17 @@ exports.handler = async (event, context) => {
             .send(msg)
             .then(() => {
                 console.log('Email sent')
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({message: "Hello World"})
+                };
             })
             .catch((error) => {
                 console.error(error)
             })
-          }
         }
-      });
-  };
+    }
+    catch (e) {
+        console.log(e)
+    }
+}
