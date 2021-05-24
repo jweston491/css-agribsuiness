@@ -31,7 +31,9 @@ exports.handler = async (event, context) => {
        
           if (params.payment_status == 'Completed') {
             // Payment has been confirmed as completed
+            console.log(SENDGRID_API_KEY)
             sgMail.setApiKey(SENDGRID_API_KEY)
+            console.log(sgMail)
             const msg = {
                 to: 'jweston491@gmail.com', // Change to your recipient
                 from: 'jacob.weston@wsu.edu', // Change to your verified sender
