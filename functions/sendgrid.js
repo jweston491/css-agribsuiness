@@ -25,6 +25,8 @@ exports.handler = async (event, context) => {
   
     ipn.verify(params, {'allow_sandbox': true}, function callback(err, msg) {
 
+        console.log("Function being called")
+
         if (err) {
           console.error(err);
         } else {
