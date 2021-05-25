@@ -38,7 +38,7 @@ exports.handler = async ( event, context ) => {
         // Split CC emails
         let cc = SENDGRID_CC_EMAILS.split(",");
 
-        if (params.payment_status == 'Completed' && params.item_number == "ORGANICFARMINGMASTERCLASS") {
+        if (params.payment_status == 'Completed' && params.item_number == "ORG") {
             // Payment has been confirmed as completed
             console.log("Payment complete")
             sgMail.setApiKey(SENDGRID_API_KEY)
