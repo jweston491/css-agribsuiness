@@ -14,7 +14,8 @@ const {
 const ipnVerify = async ( params ) => {
     console.log("Verifying...")
     return new Promise((resolve, reject) => {
-        ipn.verify(params, {'allow_sandbox': true}, function callback(err, msg) {
+        // TODO: Auto set allow_sandbox to true when not in production
+        ipn.verify(params, {'allow_sandbox': false}, function callback(err, msg) {
             if (err) return reject(err);
             resolve();
         })
@@ -33,6 +34,8 @@ exports.handler = async ( event, context ) => {
         // queryStringParameters – it’ll be in the event body encoded as a query string
         const params = querystring.parse(event.body);
 
+        console.log(params)
+
         await ipnVerify( params )
 
         // Split CC emails
@@ -43,7 +46,6 @@ exports.handler = async ( event, context ) => {
             console.log("Payment complete")
             sgMail.setApiKey(SENDGRID_API_KEY)
             console.log("Set API Key")
-            console.log(params)
             const msg = {
                 to: SENDGRID_TO_EMAIL, // Change to your recipient
                 from: {
