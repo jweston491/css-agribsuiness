@@ -8,6 +8,7 @@ const {
     SENDGRID_API_KEY,
     SENDGRID_TO_EMAIL,
     SENDGRID_FROM_EMAIL,
+    SENDGRID_CC_EMAILS
   } = process.env;
 
 const ipnVerify = async ( params ) => {
@@ -34,17 +35,24 @@ exports.handler = async ( event, context ) => {
 
         await ipnVerify( params )
 
-        if (params.payment_status == 'Completed') {
+        // Split CC emails
+        let cc = SENDGRID_CC_EMAILS.split(",");
+
+        if (params.payment_status == 'Completed' && params.item_number == "ORGANICFARMINGMASTERCLASS") {
             // Payment has been confirmed as completed
             console.log("Payment complete")
             sgMail.setApiKey(SENDGRID_API_KEY)
             console.log("Set API Key")
+            console.log(params)
             const msg = {
-                to: 'jweston491@gmail.com', // Change to your recipient
-                from: 'jacob.weston@wsu.edu', // Change to your verified sender
+                to: SENDGRID_TO_EMAIL, // Change to your recipient
+                from: {
+                    email: SENDGRID_FROM_EMAIL, // Change to your verified sender
+                    name: "CSS AgriBusiness"
+                },
                 subject: params.first_name + ' ' + params.last_name + ' registered for ' + params.item_name,
-                text: params.first_name + ' ' + params.last_name + ' registered for ' + params.item_name + '.',
-                html: '<p>Contact Info:<br/>Name: ' + params.first_name + ' ' + params.last_name + '<br/>Email: ' + params.payer_email + '<br/>Phone: ' + params.contact_phone + '</p><p>Address:<br/>' + params.address_street + '<br/>' + params.address_city + '<br/>' + params.address_state + ' ' + params.address_zip + ', ' + params.address_country + '</p>',
+                cc: cc,
+                html: '<p>Item Name: ' + params.item_name + '</p><p>Contact Info:<br/>Name: ' + params.first_name + ' ' + params.last_name + '<br/>Email: ' + params.payer_email + '<br/>Phone: ' + params.contact_phone +'</p><p>Discount: ' + params.discount + '<br/>Total:<br/>' + params.payment_gross + '</p>',
             }
             try {
                 await sgMail.send(msg);
